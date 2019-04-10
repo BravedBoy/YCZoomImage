@@ -9,6 +9,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -838,7 +839,9 @@ public class ZoomImageView extends AppCompatImageView {
 
     public void setBitmap(Bitmap bitmap){
         Drawable drawable = new BitmapDrawable(bitmap);
-        setBackground(drawable);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            setBackground(drawable);
+        }
     }
 
     /**
