@@ -1,2 +1,2 @@
-# LearningAssistance
-Python学习助手案例
+# YCZoomImage
+图片缩放库
