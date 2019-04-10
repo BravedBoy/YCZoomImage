@@ -12,12 +12,12 @@ import android.graphics.RectF;
  *     revise:
  * </pre>
  */
-public class RectFPool extends ObjectsPool<RectF>{
+public class RectPool extends ObjectsPool<RectF>{
 
     /**
      * 矩形对象池
      */
-    public RectFPool(int size) {
+    public RectPool(int size) {
         super(size);
     }
 

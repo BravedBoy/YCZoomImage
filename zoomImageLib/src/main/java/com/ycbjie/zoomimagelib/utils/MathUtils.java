@@ -6,7 +6,7 @@ import android.graphics.RectF;
 import android.widget.ImageView;
 
 import com.ycbjie.zoomimagelib.pool.MatrixPool;
-import com.ycbjie.zoomimagelib.pool.RectFPool;
+import com.ycbjie.zoomimagelib.pool.RectPool;
 
 
 /**
@@ -53,7 +53,7 @@ public class MathUtils {
     /**
      * 矩形对象池
      */
-    private static RectFPool mRectFPool = new RectFPool(16);
+    private static RectPool mRectFPool = new RectPool(16);
 
     /**
      * 获取矩形对象
