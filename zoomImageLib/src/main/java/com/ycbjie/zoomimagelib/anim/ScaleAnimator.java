@@ -39,8 +39,8 @@ public class ScaleAnimator extends ValueAnimator implements ValueAnimator.Animat
      * @param start 开始矩阵
      * @param end 结束矩阵
      */
-    public ScaleAnimator(Matrix start, Matrix end , Matrix outerMatrix ,ZoomImageView view) {
-        this(start, end, ZoomConfig.SCALE_ANIMATOR_DURATION,outerMatrix,view);
+    public ScaleAnimator(Matrix start, Matrix end ,ZoomImageView view) {
+        this(start, end, ZoomConfig.SCALE_ANIMATOR_DURATION,view);
     }
 
     /**
@@ -50,15 +50,15 @@ public class ScaleAnimator extends ValueAnimator implements ValueAnimator.Animat
      * @param end 结束矩阵
      * @param duration 动画时间
      */
-    public ScaleAnimator(Matrix start, Matrix end, long duration , Matrix outerMatrix ,ZoomImageView view) {
+    public ScaleAnimator(Matrix start, Matrix end, long duration , ZoomImageView view) {
         super();
+        this.mOuterMatrix = start;
+        this.view = view;
         setFloatValues(0, 1f);
         setDuration(duration);
         addUpdateListener(this);
         start.getValues(mStart);
         end.getValues(mEnd);
-        this.mOuterMatrix = outerMatrix;
-        this.view = view;
     }
 
     /**

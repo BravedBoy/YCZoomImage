@@ -46,8 +46,10 @@ public class MaskAnimator extends ValueAnimator implements ValueAnimator.Animato
      * @param end 动画终点状态
      * @param duration 动画持续时间
      */
-    public MaskAnimator(RectF start, RectF end, long duration , RectF mask , ZoomImageView view) {
+    public MaskAnimator(RectF start, RectF end, long duration , ZoomImageView view) {
         super();
+        this.mMask = start;
+        this.view = view;
         setFloatValues(0, 1f);
         setDuration(duration);
         addUpdateListener(this);
@@ -60,8 +62,6 @@ public class MaskAnimator extends ValueAnimator implements ValueAnimator.Animato
         mEnd[1] = end.top;
         mEnd[2] = end.right;
         mEnd[3] = end.bottom;
-        this.mMask = mask;
-        this.view = view;
     }
 
     @Override

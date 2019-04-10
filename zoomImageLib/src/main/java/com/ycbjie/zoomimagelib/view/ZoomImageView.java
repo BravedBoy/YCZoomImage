@@ -618,7 +618,7 @@ public class ZoomImageView extends AppCompatImageView {
         //清理当前可能正在执行的动画
         cancelAllAnimator();
         //启动矩阵动画
-        mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd,mOuterMatrix,this);
+        mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd,this);
         mScaleAnimator.start();
         //清理临时变量
         MathUtils.rectFGiven(testBound);
@@ -701,7 +701,7 @@ public class ZoomImageView extends AppCompatImageView {
             //清理当前可能正在执行的动画
             cancelAllAnimator();
             //启动矩阵动画
-            mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd,mOuterMatrix,this);
+            mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd,this);
             mScaleAnimator.start();
             //清理临时变量
             MathUtils.matrixGiven(animEnd);
@@ -783,7 +783,7 @@ public class ZoomImageView extends AppCompatImageView {
             invalidate();
         } else {
             //创建矩阵变化动画
-            mScaleAnimator = new ScaleAnimator(mOuterMatrix, endMatrix, duration,mOuterMatrix,this);
+            mScaleAnimator = new ScaleAnimator(mOuterMatrix, endMatrix, duration,this);
             mScaleAnimator.start();
         }
     }
@@ -812,7 +812,7 @@ public class ZoomImageView extends AppCompatImageView {
             invalidate();
         } else {
             //执行mask动画
-            mMaskAnimator = new MaskAnimator(mMask, mask, duration,mMask,this);
+            mMaskAnimator = new MaskAnimator(mMask, mask, duration,this);
             mMaskAnimator.start();
         }
     }
