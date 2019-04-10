@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.ycbjie.zoomimagelib.listener.OnZoomClickListener;
 import com.ycbjie.zoomimagelib.listener.OnZoomLongClickListener;
+import com.ycbjie.zoomimagelib.utils.ZoomUtils;
 import com.ycbjie.zoomimagelib.view.ZoomImageView;
 
 /**
@@ -20,7 +21,7 @@ public class ImageActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image);
-
+        ZoomUtils.setLog(true);
         image = findViewById(R.id.image);
         image.setOnZoomClickListener(new OnZoomClickListener() {
             @Override

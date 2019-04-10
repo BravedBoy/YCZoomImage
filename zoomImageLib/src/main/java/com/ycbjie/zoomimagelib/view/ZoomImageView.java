@@ -14,6 +14,9 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import com.ycbjie.zoomimagelib.anim.FlingAnimator;
+import com.ycbjie.zoomimagelib.anim.MaskAnimator;
+import com.ycbjie.zoomimagelib.anim.ScaleAnimator;
 import com.ycbjie.zoomimagelib.config.ZoomConfig;
 import com.ycbjie.zoomimagelib.listener.OnZoomClickListener;
 import com.ycbjie.zoomimagelib.listener.OnZoomLongClickListener;
@@ -69,6 +72,10 @@ public class ZoomImageView extends AppCompatImageView {
      * 滑动产生的惯性动画
      */
     private FlingAnimator mFlingAnimator;
+    /**
+     * mask修改的动画，和图片的动画相互独立
+     */
+    private MaskAnimator mMaskAnimator;
 
 
     public ZoomImageView(Context context) {
@@ -424,72 +431,6 @@ public class ZoomImageView extends AppCompatImageView {
     }
 
 
-
-    /**
-     * mask修改的动画，和图片的动画相互独立
-     */
-    private MaskAnimator mMaskAnimator;
-
-    /**
-     * mask变换动画
-     * 将mask从一个rect动画到另外一个rect
-     */
-    private class MaskAnimator extends ValueAnimator implements ValueAnimator.AnimatorUpdateListener {
-
-        /**
-         * 开始mask
-         */
-        private float[] mStart = new float[4];
-        /**
-         * 结束mask
-         */
-        private float[] mEnd = new float[4];
-        /**
-         * 中间结果mask
-         */
-        private float[] mResult = new float[4];
-
-        /**
-         * 创建mask变换动画
-         *
-         * @param start 动画起始状态
-         * @param end 动画终点状态
-         * @param duration 动画持续时间
-         */
-        MaskAnimator(RectF start, RectF end, long duration) {
-            super();
-            setFloatValues(0, 1f);
-            setDuration(duration);
-            addUpdateListener(this);
-            //将起点终点拷贝到数组方便计算
-            mStart[0] = start.left;
-            mStart[1] = start.top;
-            mStart[2] = start.right;
-            mStart[3] = start.bottom;
-            mEnd[0] = end.left;
-            mEnd[1] = end.top;
-            mEnd[2] = end.right;
-            mEnd[3] = end.bottom;
-        }
-
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            //获取动画进度,0-1范围
-            float value = (Float) animation.getAnimatedValue();
-            //根据进度对起点终点之间做插值
-            for (int i = 0; i < 4; i++) {
-                mResult[i] = mStart[i] + (mEnd[i] - mStart[i]) * value;
-            }
-            //期间mask有可能被置空了,所以判断一下
-            if (mMask == null) {
-                mMask = new RectF();
-            }
-            //设置新的mask并绘制
-            mMask.set(mResult[0], mResult[1], mResult[2], mResult[3]);
-            invalidate();
-        }
-    }
-
     /**
      * 让图片移动一段距离
      * 不能移动超过可移动范围,超过了就到可移动范围边界为止.
@@ -498,7 +439,7 @@ public class ZoomImageView extends AppCompatImageView {
      * @param yDiff 移动距离
      * @return 是否改变了位置
      */
-    private boolean scrollBy(float xDiff, float yDiff) {
+    public boolean scrollBy(float xDiff, float yDiff) {
         if (!isReady()) {
             return false;
         }
@@ -677,7 +618,7 @@ public class ZoomImageView extends AppCompatImageView {
         //清理当前可能正在执行的动画
         cancelAllAnimator();
         //启动矩阵动画
-        mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd);
+        mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd,mOuterMatrix,this);
         mScaleAnimator.start();
         //清理临时变量
         MathUtils.rectFGiven(testBound);
@@ -760,7 +701,7 @@ public class ZoomImageView extends AppCompatImageView {
             //清理当前可能正在执行的动画
             cancelAllAnimator();
             //启动矩阵动画
-            mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd);
+            mScaleAnimator = new ScaleAnimator(mOuterMatrix, animEnd,mOuterMatrix,this);
             mScaleAnimator.start();
             //清理临时变量
             MathUtils.matrixGiven(animEnd);
@@ -785,7 +726,7 @@ public class ZoomImageView extends AppCompatImageView {
         cancelAllAnimator();
         //创建惯性动画
         //FlingAnimator单位为 像素/帧,一秒60帧
-        mFlingAnimator = new FlingAnimator(vx / 60f, vy / 60f);
+        mFlingAnimator = new FlingAnimator(vx / 60f, vy / 60f , this);
         mFlingAnimator.start();
     }
 
@@ -800,103 +741,6 @@ public class ZoomImageView extends AppCompatImageView {
         if (mFlingAnimator != null) {
             mFlingAnimator.cancel();
             mFlingAnimator = null;
-        }
-    }
-
-    /**
-     * 惯性动画
-     * 速度逐渐衰减,每帧速度衰减为原来的FLING_DAMPING_FACTOR,当速度衰减到小于1时停止.
-     * 当图片不能移动时,动画停止.
-     */
-    private class FlingAnimator extends ValueAnimator implements ValueAnimator.AnimatorUpdateListener {
-
-        /**
-         * 速度向量
-         */
-        private float[] mVector;
-        /**
-         * 创建惯性动画，参数单位为 像素/帧
-         *
-         * @param vectorX 速度向量
-         * @param vectorY 速度向量
-         */
-        FlingAnimator(float vectorX, float vectorY) {
-            super();
-            setFloatValues(0, 1f);
-            setDuration(1000000);
-            addUpdateListener(this);
-            mVector = new float[]{vectorX, vectorY};
-        }
-
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            //移动图像并给出结果
-            boolean result = scrollBy(mVector[0], mVector[1]);
-            //衰减速度
-            mVector[0] *= ZoomConfig.FLING_DAMPING_FACTOR;
-            mVector[1] *= ZoomConfig.FLING_DAMPING_FACTOR;
-            //速度太小或者不能移动了就结束
-            if (!result || MathUtils.getDistance(0, 0, mVector[0], mVector[1]) < 1f) {
-                animation.cancel();
-            }
-        }
-    }
-
-
-    private class ScaleAnimator extends ValueAnimator implements ValueAnimator.AnimatorUpdateListener {
-        /**
-         * 开始矩阵
-         */
-        private float[] mStart = new float[9];
-        /**
-         * 结束矩阵
-         */
-        private float[] mEnd = new float[9];
-        /**
-         * 中间结果矩阵
-         */
-        private float[] mResult = new float[9];
-
-        /**
-         * 构建一个缩放动画，从一个矩阵变换到另外一个矩阵
-         * @param start 开始矩阵
-         * @param end 结束矩阵
-         */
-        ScaleAnimator(Matrix start, Matrix end) {
-            this(start, end, ZoomConfig.SCALE_ANIMATOR_DURATION);
-        }
-
-        /**
-         * 构建一个缩放动画，从一个矩阵变换到另外一个矩阵
-         *
-         * @param start 开始矩阵
-         * @param end 结束矩阵
-         * @param duration 动画时间
-         */
-        ScaleAnimator(Matrix start, Matrix end, long duration) {
-            super();
-            setFloatValues(0, 1f);
-            setDuration(duration);
-            addUpdateListener(this);
-            start.getValues(mStart);
-            end.getValues(mEnd);
-        }
-
-        /**
-         * 通知另一个动画帧的出现
-         * @param animation                 animation
-         */
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            //获取动画进度
-            float value = (Float) animation.getAnimatedValue();
-            //根据动画进度计算矩阵中间插值
-            for (int i = 0; i < 9; i++) {
-                mResult[i] = mStart[i] + (mEnd[i] - mStart[i]) * value;
-            }
-            //设置矩阵并重绘
-            mOuterMatrix.setValues(mResult);
-            invalidate();
         }
     }
 
@@ -939,7 +783,7 @@ public class ZoomImageView extends AppCompatImageView {
             invalidate();
         } else {
             //创建矩阵变化动画
-            mScaleAnimator = new ScaleAnimator(mOuterMatrix, endMatrix, duration);
+            mScaleAnimator = new ScaleAnimator(mOuterMatrix, endMatrix, duration,mOuterMatrix,this);
             mScaleAnimator.start();
         }
     }
@@ -968,7 +812,7 @@ public class ZoomImageView extends AppCompatImageView {
             invalidate();
         } else {
             //执行mask动画
-            mMaskAnimator = new MaskAnimator(mMask, mask, duration);
+            mMaskAnimator = new MaskAnimator(mMask, mask, duration,mMask,this);
             mMaskAnimator.start();
         }
     }
