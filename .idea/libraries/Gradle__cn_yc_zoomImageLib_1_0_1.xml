@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: cn.yc:zoomImageLib-1.0.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/zoomImageLib-1.0.1.aar/44d0553be1bccd29bea693b89df136b0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/zoomImageLib-1.0.1.aar/44d0553be1bccd29bea693b89df136b0/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cn.yc/zoomImageLib/1.0.1/d157f4b716d1e01e60797d2aab357aaf557ed48b/zoomImageLib-1.0.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
